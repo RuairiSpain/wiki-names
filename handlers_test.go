@@ -83,4 +83,3 @@ func TestWikiHandler_GetContent(t *testing.T) {
 		})
 	}
 }
-
