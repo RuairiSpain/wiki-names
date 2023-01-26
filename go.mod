@@ -41,6 +41,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/swaggo/files v1.0.0 // indirect
 	github.com/swaggo/gin-swagger v1.5.3 // indirect
 	github.com/swaggo/swag v1.8.10 // indirect

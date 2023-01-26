@@ -4,55 +4,62 @@ type RequestQuery struct {
 	Name   string `uri:"name" binding:"required"`
 	Locale string `uri:"locale"`
 }
-type WikiResponse struct {
-	Text string `uri:"name" binding:"required"`
+type Response struct {
+	ShortDescription string `json:"short_description"`
 }
 
+type ContentRevision struct {
+	Contentformat string `json:"contentformat"`
+	Contentmodel  string `json:"contentmodel"`
+	Content       string `json:"content"`
+}
+type PageRevision struct {
+	Pageid    int               `json:"pageid"`
+	Ns        int               `json:"ns"`
+	Title     string            `json:"title"`
+	Revisions []ContentRevision `json:"revisions"`
+}
+
+type Normalize struct {
+	Fromencoded bool   `json:"fromencoded"`
+	From        string `json:"from"`
+	To          string `json:"to"`
+}
+type PageExtract struct {
+	Pageid  int    `json:"pageid"`
+	Ns      int    `json:"ns"`
+	Title   string `json:"title"`
+	Extract string `json:"extract"`
+}
+
+type ContinueType struct {
+	Rvcontinue string `json:"rvcontinue"`
+	Continue   string `json:"continue"`
+}
+
+type WarningsType struct {
+	Main      WarningsSimpleType `json:"main"`
+	Revisions WarningsSimpleType `json:"revisions"`
+}
+type QueryPageRevisionType struct {
+	Normalized []Normalize    `json:"normalized"`
+	Pages      []PageRevision `json:"pages"`
+}
+type QueryPageExtractType struct {
+	Normalized []Normalize   `json:"normalized"`
+	Pages      []PageExtract `json:"pages"`
+}
+
+type WarningsSimpleType struct {
+	Warnings string `json:"warnings"`
+}
 type Content struct {
-	Continue struct {
-		Rvcontinue string `json:"rvcontinue"`
-		Continue   string `json:"continue"`
-	} `json:"continue"`
-	Warnings struct {
-		Main struct {
-			Warnings string `json:"warnings"`
-		} `json:"main"`
-		Revisions struct {
-			Warnings string `json:"warnings"`
-		} `json:"revisions"`
-	} `json:"warnings"`
-	Query struct {
-		Normalized []struct {
-			Fromencoded bool   `json:"fromencoded"`
-			From        string `json:"from"`
-			To          string `json:"to"`
-		} `json:"normalized"`
-		Pages []struct {
-			Pageid    int    `json:"pageid"`
-			Ns        int    `json:"ns"`
-			Title     string `json:"title"`
-			Revisions []struct {
-				Contentformat string `json:"contentformat"`
-				Contentmodel  string `json:"contentmodel"`
-				Content       string `json:"content"`
-			} `json:"revisions"`
-		} `json:"pages"`
-	} `json:"query"`
+	Continue ContinueType          `json:"continue"`
+	Warnings WarningsType          `json:"warnings"`
+	Query    QueryPageRevisionType `json:"query"`
 }
 
 type Extract struct {
-	Batchcomplete bool `json:"batchcomplete"`
-	Query         struct {
-		Normalized []struct {
-			Fromencoded bool   `json:"fromencoded"`
-			From        string `json:"from"`
-			To          string `json:"to"`
-		} `json:"normalized"`
-		Pages []struct {
-			Pageid  int    `json:"pageid"`
-			Ns      int    `json:"ns"`
-			Title   string `json:"title"`
-			Extract string `json:"extract"`
-		} `json:"pages"`
-	} `json:"query"`
+	Batchcomplete bool                 `json:"batchcomplete"`
+	Query         QueryPageExtractType `json:"query"`
 }

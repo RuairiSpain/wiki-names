@@ -7,43 +7,43 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestWiki(t *testing.T) {
+func Test_Content(t *testing.T) {
 	request := Content{
-		Continue: {
-			Rvcontinue : "json:rvcontinue",
-			Continue   : "json:continue",
+		Continue: ContinueType{
+			Rvcontinue: "json:rvcontinue",
+			Continue:   "json:continue",
 		},
-		Warnings:  {
-			Main : {
-				Warnings : "json:warnings",
+		Warnings: WarningsType{
+			Main: WarningsSimpleType{
+				Warnings: "json:warnings",
 			},
-			Revisions : {
-				Warnings : "json:warnings",
+			Revisions: WarningsSimpleType{
+				Warnings: "json:warnings",
 			},
 		},
-		Query:  {
-			Normalized: {[]{
-				Fromencoded : true,
-				From  :"json:from",
-				To    :"json:to",
-			}},
-			Pages: {[]{
-				Pageid    :    "json:pageid",
-				Ns        :    1,
-				Title     : "json:title",
-				Revisions [ {
-					Contentformat : "json:contentformat",
-					Contentmodel  : "json:contentmodel",
-					Content       : "json:content",
-				} ],
-			}],
+		Query: QueryPageRevisionType{
+			Normalized: []Normalize,{
+				Fromencoded: true,
+				From:        "json:from",
+				To:          "json:to",
+			},
+			Pages: []RevisionPage{
+				Pageid: "json:pageid",
+				Ns:     1,
+				Title:  "json:title",
+				Revisions: []ContentRevision{
+					Contentformat: "json:contentformat",
+					Contentmodel:  "json:contentmodel",
+					Content:       "json:content",
+				},
+			},
 		},
 	}
 	bytes, err := json.Marshal(request)
 	assert.Nil(t, err)
 	assert.NotNil(t, bytes)
 
-	var result Wiki
+	var result Content
 	if err = json.Unmarshal(bytes, &result); err != nil {
 		assert.Nil(t, err)
 	}
@@ -51,9 +51,9 @@ func TestWiki(t *testing.T) {
 	assert.EqualValues(t, result.Continue.Rvcontinue, request.Continue.Rvcontinue)
 	assert.EqualValues(t, result.Continue.Continue, request.Continue.Continue)
 	assert.EqualValues(t, result.Warnings.Main.Warnings, request.Warnings.Main.Warnings)
-	assert.EqualValues(t, result.Revisions.Main, request.Revisions.Main)
+	assert.EqualValues(t, result.Warnings.Revisions.Warnings, request.Warnings.Revisions.Warnings)
 
-	assert.EqualValues(t, len(result.Query.Normalized), len(request.Query.Normalized[0]))
+	assert.EqualValues(t, len(result.Query.Normalized), len(request.Query.Normalized))
 	assert.EqualValues(t, result.Query.Normalized[0].Fromencoded, request.Query.Normalized[0].Fromencoded)
 	assert.EqualValues(t, result.Query.Normalized[0].From, request.Query.Normalized[0].From)
 	assert.EqualValues(t, result.Query.Normalized[0].To, request.Query.Normalized[0].To)
@@ -64,12 +64,12 @@ func TestWiki(t *testing.T) {
 	assert.EqualValues(t, result.Query.Pages[0].Title, request.Query.Pages[0].Title)
 
 	assert.EqualValues(t, len(result.Query.Pages), len(request.Query.Pages))
-	assert.EqualValues(t, result.Query.Pages[0].Revisions.Contentformat, request.Query.Pages[0].Revisions.Contentformat)
-	assert.EqualValues(t, result.Query.Pages[0].Revisions.Contentmodel, request.Query.Pages[0].Revisions.Contentmodel)
-	assert.EqualValues(t, result.Query.Pages[0].Revisions.Content, request.Query.Pages[0].Revisions.Content)
+	assert.EqualValues(t, result.Query.Pages[0].Revisions.Contentformat, request.Query.Pages[0].Revisions[0].Contentformat)
+	assert.EqualValues(t, result.Query.Pages[0].Revisions.Contentmodel, request.Query.Pages[0].Revisions[0].Contentmodel)
+	assert.EqualValues(t, result.Query.Pages[0].Revisions.Content, request.Query.Pages[0].Revisions[0].Content)
 }
 
-func TestWikiError(t *testing.T) {
+func Test_ContentError(t *testing.T) {
 	request := WikiError{
 		Code:         400,
 		ErrorMessage: "Bad Request Error",

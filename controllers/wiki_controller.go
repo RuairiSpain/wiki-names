@@ -1,26 +1,44 @@
 package wiki_controller
 
 import (
+	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
-	client "wiki-names/clients/wiki_client"
-	domain "wiki-names/domains/wiki_domain"
-	provider "wiki-names/providers/"
+
+	wiki_domain "wiki-names/domains"
+	wiki_provider "wiki-names/providers"
 )
 
-func GetWeather(c *gin.Context) {
-	long, _ := strconv.ParseFloat(c.Param("longitude"), 64)
-	lat, _ := strconv.ParseFloat(c.Param("latitude"), 64)
-	request := domain.WikiRequest{
-		Name: c.Param(""),
-		Locale: "en"
-
+func GetContentSummary(c *gin.Context) {
+	var query wiki_domain.RequestQuery
+	if err := c.ShouldBindUri(&query); err != nil {
+		log.Fatalln("Missing name in query string")
+		c.JSON(400, gin.H{"msg": err})
+		return
 	}
-	result, apiError := provider.GetContentSummary(request)
+	result, apiError := wiki_provider.WikiProvider.GetContentSummary(query)
 	if apiError != nil {
-		c.JSON(apiError.Status(), apiError)
+		c.JSON(apiError.Code, apiError)
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}
+
+func GetExtract(c *gin.Context) {
+	var query wiki_domain.RequestQuery
+	if err := c.ShouldBindUri(&query); err != nil {
+		log.Fatalln("Missing name in query string")
+		c.JSON(400, gin.H{"msg": err})
+		return
+	}
+	// Use a default language if not set in the URL
+	if query.Locale == "" {
+		query.Locale = "en"
+	}
+	result, apiError := wiki_provider.WikiProvider.GetExtract(query)
+	if apiError != nil {
+		c.JSON(apiError.Code, apiError)
 		return
 	}
 	c.JSON(http.StatusOK, result)
