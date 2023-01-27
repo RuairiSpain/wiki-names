@@ -22,21 +22,21 @@ func Test_Content(t *testing.T) {
 			},
 		},
 		Query: QueryPageRevisionType{
-			Normalized: []Normalize,{
+			Normalized: []Normalize{{
 				Fromencoded: true,
 				From:        "json:from",
 				To:          "json:to",
-			},
-			Pages: []RevisionPage{
-				Pageid: "json:pageid",
+			}},
+			Pages: []PageRevision{{
+				Pageid: 1,
 				Ns:     1,
 				Title:  "json:title",
-				Revisions: []ContentRevision{
+				Revisions: []ContentRevision{{
 					Contentformat: "json:contentformat",
 					Contentmodel:  "json:contentmodel",
 					Content:       "json:content",
-				},
-			},
+				}},
+			}},
 		},
 	}
 	bytes, err := json.Marshal(request)
@@ -64,9 +64,9 @@ func Test_Content(t *testing.T) {
 	assert.EqualValues(t, result.Query.Pages[0].Title, request.Query.Pages[0].Title)
 
 	assert.EqualValues(t, len(result.Query.Pages), len(request.Query.Pages))
-	assert.EqualValues(t, result.Query.Pages[0].Revisions.Contentformat, request.Query.Pages[0].Revisions[0].Contentformat)
-	assert.EqualValues(t, result.Query.Pages[0].Revisions.Contentmodel, request.Query.Pages[0].Revisions[0].Contentmodel)
-	assert.EqualValues(t, result.Query.Pages[0].Revisions.Content, request.Query.Pages[0].Revisions[0].Content)
+	assert.EqualValues(t, result.Query.Pages[0].Revisions[0].Contentformat, request.Query.Pages[0].Revisions[0].Contentformat)
+	assert.EqualValues(t, result.Query.Pages[0].Revisions[0].Contentmodel, request.Query.Pages[0].Revisions[0].Contentmodel)
+	assert.EqualValues(t, result.Query.Pages[0].Revisions[0].Content, request.Query.Pages[0].Revisions[0].Content)
 }
 
 func Test_ContentError(t *testing.T) {
