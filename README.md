@@ -26,6 +26,8 @@ http://localhost:8080/search/Yoshua_Bengio
 **Response:**
 FYI, the URL names are case sensitive, so be careful when searching to use the correct uppercase lowercase letters. Maybe it would be nice to add a API endpoint that returns suggested list of search terms based on what the user types in. This would allow UI developers to add a auto-suggest box to improve usability. We could create it with a regex patterns, soundex, double metaphone or n-gram matching algorithm.
 
+I did not add any "fuzzy" matching to the API request string, because I'd like to keep the inputs and outputs deterministic over a long period of time. If fuzzy matching was part of the solution, I'd push that to the client-side team :)
+
 ```json
 {
   "short_description": "....."
