@@ -53,10 +53,11 @@ docker rm wiki_names
 ## API
 
 There are the 4 end points accessible with the API. Not the Swagger is a WIP, not enough time to build it out
-[GIN-debug] GET /search/:name --> wiki-names/controllers.GetContentSummary (4 handlers)
-[GIN-debug] GET /extract/:name --> wiki-names/controllers.GetExtract (4 handlers)
-[GIN-debug] GET /extract/:name/:locale --> wiki-names/controllers.GetExtract (4 handlers)
-[GIN-debug] GET /swagger/\*any --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (4 handlers)
+
+- [GIN-debug] GET /search/:name --> wiki-names/controllers.GetContentSummary (4 handlers)
+- [GIN-debug] GET /extract/:name --> wiki-names/controllers.GetExtract (4 handlers)
+- [GIN-debug] GET /extract/:name/:locale --> wiki-names/controllers.GetExtract (4 handlers)
+- [GIN-debug] GET /swagger/\*any --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (4 handlers)
 
 ## Deployment to Production and CI/CD pipeline
 
@@ -117,7 +118,10 @@ pipeline {
 ## Scaling, fallback, observability and performance
 
 My preferred would be to have local Helm files in the current Repo, and run a Helm deploy CLI command to deploy to EKS on AWS.
-The Helm files would contain auto-scaling based on CPU load on the PODs, an example of the Helm script would be, below. The way the PODs scale is based on CPU load, but we can also use network traffic and maybe look at a per-customer rate limit to stop some users from overloading and exhausting the Kubernetes cluster (like BOT attacks).
+
+The Helm files would contain auto-scaling based on CPU load on the PODs, an example of the Helm script would be, below.
+
+The way the PODs scale is based on CPU load, but we can also use network traffic and maybe look at a per-customer rate limit to stop some users from overloading and exhausting the Kubernetes cluster (like BOT attacks).
 
 ```
 {{- if .Values.hpa.enabled -}}
@@ -136,7 +140,9 @@ spec:
 {{- end }}
 ```
 
-To that end, I'd configure Nginx to be the Load Balancer to proxy the inbound HTTP request to the PODS, and keep metrics on which custom makes each request. This would allow us to create a rate limit or fast-track configuration, where higher paying customers get less restrictions.
+To that end, I'd configure Nginx to be the Load Balancer to proxy the inbound HTTP request to the PODS, and keep metrics on which custom makes each request.
+
+This would allow us to create a rate limit or fast-track configuration, where higher paying customers get less restrictions.
 Depending on the number of users and network traffic, the number of PODs could be small, starting out with 3 and going up to having individual namespaces or clusters for larger clients.
 
 The logs from each service would be directed to AWS CloudWatch, so all observability is within one main index. And add SRE alerts to trigger depending on some log filters and metrics.
@@ -145,9 +151,15 @@ If security and over use uis a worry, I'd look at adding a WAF firewall and mayb
 
 ## Network reliability and availability
 
-We are using the Wikimedia Endpoints here and there is a concern that we may overload their network with requests, that is why I added a in memory (or Redis caching) on our API results. THis is a question that should be brought to the client and out PO to see if timeliness of data feeds is a issue, current code can cache up to two minutes of data per unique URL. Some customers may want more timely information. This could be configured on a per-customer basis, if we add API keys and track key usage with the API code.
+We are using the Wikimedia Endpoints here and there is a concern that we may overload their network with requests, that is why I added a in memory (or Redis caching) on our API results.
 
-One option is to add better fallback logic if the network between this service and the WikiMedia APIs is unreliable. We could add a Retry with exponential time outs, if the Wikimedia endpoints are not responding. We'd need to monitor this change in logic, because there is a danger our API would accelerate the Wikimedia API delays, by flooding their service with multiple requests, while there service is not responding or enduring high demand. Again, this needs to be discussed with Tech Leads and POs to decide the probability of slow (or poor) network responses from the main Wikimedia APIs. My assumption is that this API and network infrastructure is stable and scalable for our needs with the simple API.
+This is a question that should be brought to the client and out PO to see if timeliness of data feeds is a issue, current code can cache up to two minutes of data per unique URL. Some customers may want more timely information. This could be configured on a per-customer basis, if we add API keys and track key usage with the API code.
+
+One option is to add better fallback logic if the network between this service and the WikiMedia APIs is unreliable. We could add a Retry with exponential time outs, if the Wikimedia endpoints are not responding.
+
+We'd need to monitor this change in logic, because there is a danger our API would accelerate the Wikimedia API delays, by flooding their service with multiple requests, while there service is not responding or enduring high demand.
+
+Again, this needs to be discussed with Tech Leads and POs to decide the probability of slow (or poor) network responses from the main Wikimedia APIs. My assumption is that this API and network infrastructure is stable and scalable for our needs with the simple API.
 
 ## Learning Outcomes
 
@@ -162,6 +174,14 @@ I didn't have enough time to complete:
 
 ## Multi-lingual Markup and WikiText Parsing Complexity
 
-Overall it was a fun exercise, it allowed me to get a glimpse at the complexity of the WikiText markdown and the variety of formatting you have across the different languages. After chatting with Stefania, my first thought would be to get a better visibility of the types of markup tags are use and frequency of tag patterns, to see which ones are highest priority to parse. IT's probably too difficult to ask editors to agree on a single formatting vocabulary for the tagging, so it's not simple. My solution would be to experiment with ML parsing models to find the distribution of tagging patterns, and tune a ML model to accurately parse the tagging correctly. I'm excited to delve into the Table parsing question to come up with an AI model that extract table data in a structured and flexible way, training a model to adapt to formatting styles and choose the best table parser it can produce.
+Overall it was a fun exercise, it allowed me to get a glimpse at the complexity of the WikiText markdown and the variety of formatting you have across the different languages.
+
+After chatting with Stefania, my first thought would be to get better visualization with charts and graphs of the types of markup tags are use and frequency of tag patterns, to see which ones are highest priority to parse. Understanding the scope of the tagging vocabulary and clustering into groups is an ideal application of ML Classification modelling.
+
+It's probably too difficult to ask editors to agree on a single formatting vocabulary for the tagging, so it's not simple.
+
+My solution would be to experiment with ML parsing models to find the distribution of tagging patterns, and tune a ML model to accurately parse the tagging correctly.
+
+I'm excited to delve into the Table parsing question to come up with an AI model that extract table data in a structured and flexible way, training a model to adapt to formatting styles and choose the best table parser it can produce.
 
 As an interim solution, I added a /extract/ API endpoint to the solution code. This returns the first two sentences of the Extract text for that query. This is a compromise, and not in the requirements. IT would need sign-off by the PO and TechLead in the team :)
